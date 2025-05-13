@@ -23,4 +23,12 @@ include = ["chrysalis*"]
 version = { attr = "chrysalis.__about__.__version__" }
 
 [dependency-groups]
-dev = ["furo>=2025.7.19", "mypy>=1.17.1", "ruff>=0.12.11", "sphinx>=8.2.3"]
+dev = [
+    "furo>=2025.7.19",
+    "mypy>=1.17.1",
+    "polars>=1.33.1",
+    "pyarrow>=21.0.0",
+    "ruff>=0.12.11",
+    "sphinx>=8.2.3",
+    "sqlglot>=27.15.2",
+]
