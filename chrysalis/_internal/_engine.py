@@ -86,14 +86,13 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
 
         # Sqlite3 doesn't enfore foreign key existance by default.
         self.conn.execute("PRAGMA foreign_keys = ON")
-        
+
         self.conn.execute(_CREATE_INPUT_DATA_TABLE)
         self.conn.execute(_CREATE_APPLIED_TRANSFORMATION_TABLE)
         self.conn.execute(_CREATE_INVARIANT_TABLE)
 
         return self.conn, self.db_path
 
-    
     def __exit__(self, *args, **kwargs):
         # Close the SQLite connection *before* deleting the directory
         try:
@@ -228,7 +227,7 @@ VALUES (?, ?, ?, ?);
         previous_transformation_id: str | None = None
         previous_inputs = list(self._input_data.values())
         previous_results = results
-        
+
         self._writer.start_live()
         for link_index, relation in enumerate(relation_chain):
             current_inputs: list[T] = []
@@ -290,7 +289,7 @@ VALUES (?, ?, ?, ?);
             previous_transformation_id = current_transformation_id
             previous_inputs = current_inputs
             previous_results = current_results
-        
+
         self._writer.stop_live()
         self._writer.print_failed_relations()
         self._writer.print_summary()
