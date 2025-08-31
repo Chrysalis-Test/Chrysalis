@@ -20,6 +20,7 @@ uninitialized so that its generic can be specified at run time.
 
 def new_knowledge_base() -> None:
     """Initialize a new knowledge base for the module."""
+
     global _CURRENT_KNOWLEDGE_BASE  # NOQA: PLW0603
     _CURRENT_KNOWLEDGE_BASE = KnowledgeBase()
 
