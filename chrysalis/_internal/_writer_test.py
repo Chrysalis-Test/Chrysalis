@@ -1,11 +1,14 @@
+from typing import Any
+
 import pytest
 from rich.console import Console
+
 from chrysalis._internal._search import SearchStrategy
 from chrysalis._internal._writer import TerminalUIWriter, Verbosity
 
 
 def test_print_header_standard_output(capsys: pytest.CaptureFixture) -> None:
-    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=False)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.ALL, pretty=False)
     writer.print_header(
         search_strategy=SearchStrategy.RANDOM,
         chain_length=10,
@@ -18,7 +21,7 @@ def test_print_header_standard_output(capsys: pytest.CaptureFixture) -> None:
 
 
 def test_print_header_with_low_verbosity(capsys: pytest.CaptureFixture) -> None:
-    writer = TerminalUIWriter(verbosity=Verbosity.SILENT, pretty=False)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.SILENT, pretty=False)
     writer.print_header(
         search_strategy=SearchStrategy.RANDOM,
         chain_length=42,
@@ -30,7 +33,7 @@ def test_print_header_with_low_verbosity(capsys: pytest.CaptureFixture) -> None:
 
 def test_print_header_pretty_mode() -> None:
     console = Console(record=True)
-    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=True)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.ALL, pretty=True)
     writer._console = console
 
     writer.print_header(
@@ -50,7 +53,7 @@ def test_print_header_pretty_mode() -> None:
 
 
 def test_print_tested_relation_standard(capsys: pytest.CaptureFixture) -> None:
-    writer = TerminalUIWriter(verbosity=Verbosity.FAILURE, pretty=False)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.FAILURE, pretty=False)
 
     writer.print_tested_relation(success=True)
     writer.print_tested_relation(success=False)
@@ -62,7 +65,7 @@ def test_print_tested_relation_standard(capsys: pytest.CaptureFixture) -> None:
 
 def test_print_tested_relation_pretty() -> None:
     console = Console(record=True)
-    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=True)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.ALL, pretty=True)
     writer._console = console
     writer.start_live()
 
@@ -83,7 +86,7 @@ def test_print_tested_relation_pretty() -> None:
 
 
 def test_print_failed_relations_standard(capsys: pytest.CaptureFixture) -> None:
-    writer = TerminalUIWriter(verbosity=Verbosity.FAILURE, pretty=False)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.FAILURE, pretty=False)
 
     writer.store_failed_relation(
         failed_relation="rel_identity_preserves_shape",
@@ -99,7 +102,7 @@ def test_print_failed_relations_standard(capsys: pytest.CaptureFixture) -> None:
 
 def test_print_failed_relations_pretty() -> None:
     console = Console(record=True)
-    writer = TerminalUIWriter(verbosity=Verbosity.FAILURE, pretty=True)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.FAILURE, pretty=True)
     writer._console = console
 
     writer.store_failed_relation(
@@ -113,28 +116,26 @@ def test_print_failed_relations_pretty() -> None:
 
 
 def test_print_summary_standard(capsys: pytest.CaptureFixture) -> None:
-    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=False)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.ALL, pretty=False)
 
     writer._success_count = 3
     writer._failure_count = 1
-    writer.print_summary(time_taken=1.23)
+    writer.print_summary()
     captured = capsys.readouterr()
 
     assert "Passed: 3" in captured.out
     assert "Failed: 1" in captured.out
-    assert "1.23" in captured.out
 
 
 def test_print_summary_pretty() -> None:
     console = Console(record=True)
-    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=True)
+    writer = TerminalUIWriter[Any, Any](verbosity=Verbosity.ALL, pretty=True)
     writer._console = console
 
     writer._success_count = 2
     writer._failure_count = 2
-    writer.print_summary(time_taken=4.56)
+    writer.print_summary()
     output = console.export_text()
 
     assert "✔ Passed" in output
     assert "✘ Failed" in output
-    assert "4.56" in output

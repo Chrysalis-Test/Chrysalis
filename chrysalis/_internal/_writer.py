@@ -78,7 +78,7 @@ class TerminalUIWriter[T, R]:
     ) -> None:
         self._verbosity = verbosity
         self._pretty = pretty
-        self._console = Console() if pretty else None
+        self._console = Console()
         self._failed_relations: list[FailedInvaraint[T, R]] = []
 
         self._live_display = None
@@ -137,7 +137,7 @@ class TerminalUIWriter[T, R]:
             print()
 
     def _print_tested_relation_level_failure(self, success: bool) -> None:
-        if self._pretty and self._progress:
+        if self._pretty and self._progress and self._progress_task:
             self._progress.update(self._progress_task, advance=1)
         else:
             print("." if success else "F", end="")
