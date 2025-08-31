@@ -3,6 +3,7 @@ from rich.console import Console
 from chrysalis._internal._search import SearchStrategy
 from chrysalis._internal._writer import TerminalUIWriter, Verbosity
 
+
 def test_print_header_standard_output(capsys: pytest.CaptureFixture) -> None:
     writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=False)
     writer.print_header(
@@ -15,6 +16,7 @@ def test_print_header_standard_output(capsys: pytest.CaptureFixture) -> None:
     assert "Chain Length: 10" in captured.out
     assert "Num Chains: 5" in captured.out
 
+
 def test_print_header_with_low_verbosity(capsys: pytest.CaptureFixture) -> None:
     writer = TerminalUIWriter(verbosity=Verbosity.SILENT, pretty=False)
     writer.print_header(
@@ -25,12 +27,10 @@ def test_print_header_with_low_verbosity(capsys: pytest.CaptureFixture) -> None:
     captured = capsys.readouterr()
     assert captured.out == ""
 
+
 def test_print_header_pretty_mode() -> None:
     console = Console(record=True)
-    writer = TerminalUIWriter(
-        verbosity=Verbosity.ALL,
-        pretty=True
-    )
+    writer = TerminalUIWriter(verbosity=Verbosity.ALL, pretty=True)
     writer._console = console
 
     writer.print_header(
@@ -51,7 +51,7 @@ def test_print_header_pretty_mode() -> None:
 
 def test_print_tested_relation_standard(capsys: pytest.CaptureFixture) -> None:
     writer = TerminalUIWriter(verbosity=Verbosity.FAILURE, pretty=False)
-    
+
     writer.print_tested_relation(success=True)
     writer.print_tested_relation(success=False)
 
@@ -67,8 +67,11 @@ def test_print_tested_relation_pretty() -> None:
     writer.start_live()
 
     writer.print_tested_relation(success=True, metadata={"relation": "foo", "index": 1})
-    writer.print_tested_relation(success=False, metadata={"relation": "bar", "index": 2, "failed_invariants": ["inv1"]})
-    
+    writer.print_tested_relation(
+        success=False,
+        metadata={"relation": "bar", "index": 2, "failed_invariants": ["inv1"]},
+    )
+
     writer.stop_live()
 
     output = console.export_text()
@@ -84,7 +87,7 @@ def test_print_failed_relations_standard(capsys: pytest.CaptureFixture) -> None:
 
     writer.store_failed_relation(
         failed_relation="rel_identity_preserves_shape",
-        failed_invariants=["shape_unchanged", "not_null"]
+        failed_invariants=["shape_unchanged", "not_null"],
     )
     writer.print_failed_relations()
     captured = capsys.readouterr()
@@ -93,14 +96,14 @@ def test_print_failed_relations_standard(capsys: pytest.CaptureFixture) -> None:
     assert "shape_unchanged" in captured.out
     assert "not_null" in captured.out
 
+
 def test_print_failed_relations_pretty() -> None:
     console = Console(record=True)
     writer = TerminalUIWriter(verbosity=Verbosity.FAILURE, pretty=True)
     writer._console = console
 
     writer.store_failed_relation(
-        failed_relation="rel_sort_stability",
-        failed_invariants=["order_preserved"]
+        failed_relation="rel_sort_stability", failed_invariants=["order_preserved"]
     )
     writer.print_failed_relations()
     output = console.export_text()
@@ -120,6 +123,7 @@ def test_print_summary_standard(capsys: pytest.CaptureFixture) -> None:
     assert "Passed: 3" in captured.out
     assert "Failed: 1" in captured.out
     assert "1.23" in captured.out
+
 
 def test_print_summary_pretty() -> None:
     console = Console(record=True)

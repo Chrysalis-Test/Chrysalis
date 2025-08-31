@@ -51,20 +51,17 @@ def test_successful_relation_chain(
                 "Error extracting sample expression from returned duckdb connection."
             )
 
-    assert (
-        [
-            ("identity", 0),
-            ("inverse", 1),
-            ("subtract_1_from_expression", 2),
-        ]
-        == conn.execute(
-            """
+    assert [
+        ("identity", 0),
+        ("inverse", 1),
+        ("subtract_1_from_expression", 2),
+    ] == conn.execute(
+        """
 SELECT name, link_index
 FROM applied_transformation
 ORDER BY link_index;
                  """
-        ).fetchall()
-    )
+    ).fetchall()
 
     assert conn.execute("SELECT COUNT(*) FROM failed_invariant").fetchall() == [(0,)]
 
@@ -93,20 +90,17 @@ def test_unsuccessful_relation_chain(
                 "Error extracting sample expression from returned duckdb connection."
             )
 
-    assert (
-        [
-            ("identity", 0),
-            ("inverse", 1),
-            ("subtract_1_from_expression", 2),
-        ]
-        == conn.execute(
-            """
+    assert [
+        ("identity", 0),
+        ("inverse", 1),
+        ("subtract_1_from_expression", 2),
+    ] == conn.execute(
+        """
 SELECT name, link_index
 FROM applied_transformation
 ORDER BY link_index;
                  """
-        ).fetchall()
-    )
+    ).fetchall()
 
     assert [("equals",)] == conn.execute(
         "SELECT name FROM failed_invariant;"

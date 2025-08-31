@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import time
 from collections.abc import Callable
 from enum import IntEnum
 from functools import cache
@@ -10,10 +11,15 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
-from rich.progress import Progress, BarColumn, TextColumn, TimeElapsedColumn, SpinnerColumn
+from rich.progress import (
+    Progress,
+    BarColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    SpinnerColumn,
+)
 from rich.live import Live
 
-import time
 
 from chrysalis._internal._search import SearchStrategy
 
@@ -68,18 +74,18 @@ class TerminalUIWriter[T, R]:
         self,
         verbosity: Verbosity = Verbosity.FAILURE,
         pretty: bool = False,
-        total_relations: int | None = None
+        total_relations: int | None = None,
     ) -> None:
         self._verbosity = verbosity
         self._pretty = pretty
         self._console = Console() if pretty else None
         self._failed_relations: list[FailedInvaraint[T, R]] = []
-        
+
         self._live_display = None
         self._result_bar = Text()
-        
+
         self._time = 0
-        
+
         self._success_count = 0
         self._failure_count = 0
 
@@ -108,11 +114,21 @@ class TerminalUIWriter[T, R]:
         num_chains: int,
     ) -> None:
         if self._pretty:
-            self._console.print(Panel(Text("CHRYSALIS Metamorphic Test", justify="center", style="bold magenta")))
-            self._console.print(f"[bold cyan]Search Strategy:[/] {search_strategy.name}")
+            self._console.print(
+                Panel(
+                    Text(
+                        "CHRYSALIS Metamorphic Test",
+                        justify="center",
+                        style="bold magenta",
+                    )
+                )
+            )
+            self._console.print(
+                f"[bold cyan]Search Strategy:[/] {search_strategy.name}"
+            )
             self._console.print(f"[bold cyan]Chain Length:[/] {chain_length}")
             self._console.print(f"[bold cyan]Num Chains:[/] {num_chains}")
-            self._console.print()            
+            self._console.print()
         else:
             print(_ASCII_ART_CHRYSALIS)
             print(f"Search Strategy: {search_strategy.name}")
@@ -130,10 +146,11 @@ class TerminalUIWriter[T, R]:
         else:
             self._failure_count += 1
 
-    
     def start_live(self):
         if self._pretty and self._verbosity == Verbosity.ALL:
-            self._live_display = Live(self._result_bar, console=self._console, refresh_per_second=10)
+            self._live_display = Live(
+                self._result_bar, console=self._console, refresh_per_second=10
+            )
             self._live_display.start()
         self._time = time.time()
 
@@ -142,8 +159,10 @@ class TerminalUIWriter[T, R]:
             self._live_display.stop()
             self._live_display = None
         self._time = time.time() - self._time
-    
-    def _print_tested_relation_level_all(self, success: bool, metadata: dict | None = None) -> None:
+
+    def _print_tested_relation_level_all(
+        self, success: bool, metadata: dict | None = None
+    ) -> None:
         char = "[green].[/]" if success else "[red]F[/]"
         self._result_bar.append(char)
         if self._live_display:
@@ -157,9 +176,10 @@ class TerminalUIWriter[T, R]:
         elif metadata and self._verbosity == Verbosity.ALL:
             self._console.print(f"[green]✔ Success:[/] {metadata}")
 
-
     @min_verbosity_level(verbosity=Verbosity.FAILURE)
-    def print_tested_relation(self, success: bool, *, metadata: dict | None = None) -> None:
+    def print_tested_relation(
+        self, success: bool, *, metadata: dict | None = None
+    ) -> None:
         if self._verbosity == Verbosity.FAILURE:
             self._print_tested_relation_level_failure(success=success)
         else:
