@@ -82,8 +82,10 @@ def run[T, R](
         chain_length=chain_length,
     )
     relation_chains = search_space.generate_chains(num_chains=num_chains)
-    writer = TerminalUIWriter(
-        verbosity=verbosity, pretty=True, total_relations=len(relation_chains)
+    writer = TerminalUIWriter[T, R](
+        verbosity=verbosity,
+        pretty=True,
+        total_relations=len(relation_chains),
     )
     writer.print_header(search_strategy, chain_length, num_chains)
 

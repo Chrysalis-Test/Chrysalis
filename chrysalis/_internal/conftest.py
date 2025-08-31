@@ -18,11 +18,13 @@ def sample_expression_2() -> ast.Expression:
 
 class _MultiplyConstantsBy2(ast.NodeTransformer):
     def visit_Num(self, node: ast.Constant) -> ast.Constant:  # NOQA: N802
+        assert isinstance(node.value, int)
         return ast.Constant(value=node.value * 2)
 
 
 class _DivideConstantsBy2(ast.NodeTransformer):
     def visit_Num(self, node: ast.Constant) -> ast.Constant:  # NOQA: N802
+        assert isinstance(node.value, int)
         return ast.Constant(value=node.value / 2)
 
 
