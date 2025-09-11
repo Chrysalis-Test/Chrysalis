@@ -9,28 +9,15 @@ description = 'A metamorphic testing framework for Python'
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-keywords = []
 authors = [
   { name = "Nathan Huey", email = "nathanhuey44@gmail.com" },
   { name = "Jai Parera", email = "jaiparera@gmail.com" },
 ]
-dependencies = ["pytest>=8.0.0", "duckdb>=1.2.0", "rich>=14.1.0"]
+dependencies = ["pytest>=8.0.0", "duckdb>=1.2.0"]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["chrysalis*"]
-
-[tool.coverage.run]
-source_pkgs = ["chrysalis", "tests"]
-branch = true
-parallel = true
-omit = ["chrysalis/__about__.py"]
-[tool.coverage.paths]
-chrysalis = ["chrysalis", "*/chrysalis/chrysalis"]
-tests = ["tests", "*/chrysalis/tests"]
-
-[tool.coverage.report]
-exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [dependency-groups]
 dev = ["mypy>=1.17.1", "ruff>=0.12.11"]
