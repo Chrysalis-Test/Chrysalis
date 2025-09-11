@@ -117,6 +117,5 @@ class KnowledgeBase[T, R]:
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}("
-            f"relations={list(self._transformations.keys())}"
+            f"{self.__class__.__name__}(relations={list(self._transformations.keys())}"
         )
