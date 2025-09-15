@@ -50,8 +50,8 @@ def run[T, R](
     """
     Run metamorphic testing on the SUT using previously registered relations.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     sut : Callable[[T], R]
         The 'system under test' that is currenting being tested.
     input_data : list[T]
