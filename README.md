@@ -50,9 +50,14 @@ results = chry.run(
 )
 ```
 
+## Official Documentation
+
+[docs](https://chrysalis-test.github.io/Chrysalis/index.html)
+
 ## Development
 
 For development, use the following commands:
 
 - Format and check code: `./scripts/format_and_check.sh`
 - Run tests: `uv run pytest`
+- Build docs: `./scripts/build_docs.sh`
