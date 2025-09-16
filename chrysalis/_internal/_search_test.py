@@ -1,8 +1,9 @@
 import ast
+import random
 
 from chrysalis._internal import _invariants as invariants
 from chrysalis._internal._relation import KnowledgeBase
-from chrysalis._internal._search import SearchSpace
+from chrysalis._internal._search import SearchSpace, SearchStrategy
 from chrysalis._internal.conftest import (
     identity,
     inverse,
@@ -21,13 +22,16 @@ def test_metamorphic_search_random() -> None:
         invariant=invariants.not_equals,
     )
 
-    search_space = SearchSpace(knowledge_base=knowledge_base)
-    relation_chains = search_space.generate_chains(5)
-    assert len(relation_chains) == 5
-    assert all(len(relation_chain) == 10 for relation_chain in relation_chains)
-    assert all(
-        {relation.transformation_name for relation in relation_chain}.issubset(
-            {"identity", "inverse"}
-        )
-        for relation_chain in relation_chains
+    search_space = SearchSpace(
+        knowledge_base=knowledge_base, strategy=SearchStrategy.RANDOM
     )
+
+    random.seed(0)
+    generator = search_space.create_generator()
+    relation_chain = [next(generator) for _ in range(10)]
+
+    assert len(relation_chain) == 10
+    assert set([relation.transformation_name for relation in relation_chain]) == {
+        "identity",
+        "inverse",
+    }

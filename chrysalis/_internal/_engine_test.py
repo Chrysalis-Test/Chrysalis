@@ -1,10 +1,21 @@
 import ast
 import pickle
+from typing import Generator
+
+from unittest.mock import MagicMock
 
 from chrysalis._internal._engine import Engine
 from chrysalis._internal._relation import KnowledgeBase, Relation
 from chrysalis._internal._tables import TemporarySqlite3RelationConnection
 from chrysalis._internal.conftest import eval_expr
+
+
+def mock_generator(relations: list[Relation]) -> Generator[Relation, None, None]:
+    def generator() -> Generator[Relation, None, None]:
+        for relation in relations:
+            yield relation
+
+    return generator()
 
 
 def test_successful_relation_chain(
@@ -16,14 +27,20 @@ def test_successful_relation_chain(
         temp_conn,
         db_path,
     ):
+        search_space = MagicMock()
+        search_space.create_generator.return_value = mock_generator(
+            correct_relation_chain
+        )
+
         engine = Engine(
             sut=eval_expr,
-            sqlite_conn=temp_conn,
             input_data=[sample_expression_1],
+            search_space=search_space,
+            sqlite_conn=temp_conn,
             sqlite_db=db_path,
             num_processes=1,
         )
-        engine.execute([correct_relation_chain])
+        engine.execute(chain_length=3, num_chains=1)
         conn = engine.results_to_duckdb()
 
     match conn.execute("SELECT * FROM input_data;").fetchall():
@@ -59,14 +76,19 @@ def test_unsuccessful_relation_chain(
         temp_conn,
         db_path,
     ):
+        search_space = MagicMock()
+        search_space.create_generator.return_value = mock_generator(
+            incorrect_relation_chain
+        )
         engine = Engine(
             sut=eval_expr,
-            sqlite_conn=temp_conn,
             input_data=[sample_expression_1],
+            search_space=search_space,
+            sqlite_conn=temp_conn,
             sqlite_db=db_path,
             num_processes=1,
         )
-        engine.execute([incorrect_relation_chain])
+        engine.execute(chain_length=3, num_chains=1)
         conn = engine.results_to_duckdb()
 
     match conn.execute("SELECT * FROM input_data;").fetchall():

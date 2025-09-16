@@ -7,7 +7,7 @@ from chrysalis._internal.conftest import (
 
 
 def test_single_register() -> None:
-    controller.new_knowledge_base()
+    controller.reset_knowledge_base()
     controller.register(
         transformation=identity,
         invariant=invariants.equals,
@@ -23,7 +23,7 @@ def test_single_register() -> None:
 
 
 def test_multiple_register() -> None:
-    controller.new_knowledge_base()
+    controller.reset_knowledge_base()
     controller.register(
         transformation=identity,
         invariant=invariants.equals,
