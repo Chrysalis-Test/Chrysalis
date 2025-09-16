@@ -18,7 +18,7 @@ uninitialized so that its generic can be specified at run time.
 """
 
 
-def new_knowledge_base() -> None:
+def reset_knowledge_base() -> None:
     """Initialize a new knowledge base for the module."""
     global _CURRENT_KNOWLEDGE_BASE  # NOQA: PLW0603
     _CURRENT_KNOWLEDGE_BASE = KnowledgeBase()
@@ -46,7 +46,7 @@ def run[T, R](
     chain_length: int = 10,
     num_chains: int = 10,
     num_processes: int = 1,
-) -> duckdb.DuckDBPyConnection | None:
+) -> duckdb.DuckDBPyConnection:
     """
     Run metamorphic testing on the SUT using previously registered relations.
 
@@ -81,18 +81,20 @@ def run[T, R](
         search_space = SearchSpace(
             knowledge_base=_CURRENT_KNOWLEDGE_BASE,
             strategy=search_strategy,
-            chain_length=chain_length,
         )
-        relation_chains = search_space.generate_chains(num_chains=num_chains)
 
         engine = Engine(
             sut=sut,
-            sqlite_conn=conn,
             input_data=input_data,
-            sqlite_db=db_path,
             num_processes=num_processes,
+            search_space=search_space,
+            sqlite_conn=conn,
+            sqlite_db=db_path,
         )
-        engine.execute(relation_chains)
+        engine.execute(
+            chain_length=chain_length,
+            num_chains=num_chains,
+        )
 
         duckdb_conn = engine.results_to_duckdb()
         conn.close()

@@ -6,7 +6,7 @@ from pathlib import Path
 import duckdb
 
 from chrysalis._internal import _tables as tables
-from chrysalis._internal._relation import Relation
+from chrysalis._internal._search import SearchSpace
 
 
 class Engine[T, R]:
@@ -38,6 +38,7 @@ class Engine[T, R]:
         self,
         sut: Callable[[T], R],
         input_data: list[T],
+        search_space: SearchSpace,
         sqlite_conn: sqlite3.Connection,
         sqlite_db: Path,
         num_processes: int = 8,
@@ -46,6 +47,7 @@ class Engine[T, R]:
             raise NotImplementedError
 
         self._sut = sut
+        self._search_space = search_space
         self._conn = sqlite_conn
         self._sqlite_db = sqlite_db
         self._num_processes = num_processes
@@ -120,7 +122,7 @@ VALUES (?, ?, ?, ?);
 
     def _execute_chain(
         self,
-        relation_chain: list[Relation],
+        chain_length: int,
         cursor: sqlite3.Cursor,
     ) -> None:
         """Execute a relation chain and store all results in a provided database."""
@@ -133,10 +135,13 @@ VALUES (?, ?, ?, ?);
             # error.
             results.append(self._sut(curr_input))  # NOQA: PERF401
 
+        generator = self._search_space.create_generator()
+
         relation_chain_id = tables.generate_uuid()
         previous_inputs = list(self._input_data.values())
         previous_results = results
-        for link_index, relation in enumerate(relation_chain):
+        for link_index in range(chain_length):
+            relation = next(generator)
             current_inputs: list[T] = []
             for prev_input in previous_inputs:
                 # TODO(nathanhuey44@gmail.com): Catch errors, exit gracefully, and
@@ -172,7 +177,11 @@ VALUES (?, ?, ?, ?);
             previous_inputs = current_inputs
             previous_results = current_results
 
-    def execute(self, relation_chains: list[list[Relation]]) -> None:
+    def execute(
+        self,
+        chain_length: int,
+        num_chains: int,
+    ) -> None:
         """
         Execute a list of provided relation chains and store the results.
 
@@ -186,8 +195,11 @@ VALUES (?, ?, ?, ?);
         # TODO(nathanhuey44@gmail.com): Implement a multi-process version of this
         # execute functionality using sqlite3 cursors.
         cursor = self._conn.cursor()
-        for relation_chain in relation_chains:
-            self._execute_chain(relation_chain=relation_chain, cursor=cursor)
+        for _ in range(num_chains):
+            self._execute_chain(
+                chain_length=chain_length,
+                cursor=cursor,
+            )
         self._conn.commit()
 
     def results_to_duckdb(self) -> duckdb.DuckDBPyConnection:
