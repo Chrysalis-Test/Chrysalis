@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 
 import duckdb
 
@@ -45,6 +46,7 @@ def run[T, R](
     search_strategy: SearchStrategy = SearchStrategy.RANDOM,
     chain_length: int = 10,
     num_chains: int = 10,
+    persistent_db_path: Path | None = None,
     num_processes: int = 1,
 ) -> duckdb.DuckDBPyConnection:
     """
@@ -66,6 +68,10 @@ def run[T, R](
     num_chains : int, optional
         The number of metamorphic chains to generate. The number of chains defaults to
         10.
+    persistent_db_path : Path, optional
+        The location to save the database file for the resultant duckdb connection. If
+        no value is specified, the duckdb connection is made in-memory and thus the
+        data in the connection is lost when the processes exits.
     num_processes: int, optional
         The number of processes to use when performing metamorphic testing.
     """
@@ -96,7 +102,7 @@ def run[T, R](
             num_chains=num_chains,
         )
 
-        duckdb_conn = engine.results_to_duckdb()
+        duckdb_conn = engine.results_to_duckdb(db_path=persistent_db_path)
         conn.close()
 
     return duckdb_conn

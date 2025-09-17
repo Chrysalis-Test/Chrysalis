@@ -148,7 +148,10 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
         return conn, db_path
 
 
-def sqlite_to_duckdb(sqlite_db: Path) -> duckdb.DuckDBPyConnection:
+def sqlite_to_duckdb(
+    sqlite_db: Path,
+    output_db_path: Path | None = None,
+) -> duckdb.DuckDBPyConnection:
     """
     Convert a chrysalis sqlite3 database into a duckdb database.
 
@@ -157,7 +160,10 @@ def sqlite_to_duckdb(sqlite_db: Path) -> duckdb.DuckDBPyConnection:
     as the `applied_transformation` table require additional care as self-referential
     foreign key constraints can become problematic.
     """
-    duckdb_conn = duckdb.connect()
+    if output_db_path is not None:
+        duckdb_conn = duckdb.connect(output_db_path)
+    else:
+        duckdb_conn = duckdb.connect()
 
     # Sqlite needs to be installed within duckdb before `sqlite_scan` can be used.
     duckdb_conn.execute("INSTALL sqlite;")
