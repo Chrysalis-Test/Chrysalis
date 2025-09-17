@@ -20,13 +20,6 @@ class SearchStrategy(Enum):
 
     RANDOM = 1
 
-    def get_generator(self, knowledge_base: KnowledgeBase) -> SearchGenerator:
-        match self.value:
-            case SearchStrategy.RANDOM.value:
-                return RandomGenerator(knowledge_base=knowledge_base)
-            case _:
-                assert_never(self.value)
-
 
 class RandomGenerator(SearchGenerator):
     def __init__(self, knowledge_base: KnowledgeBase) -> None:
@@ -64,4 +57,8 @@ class SearchSpace:
 
     def create_generator(self) -> SearchGenerator:
         """Used to generate metamorphic chains based on search strategy."""
-        return self._strategy.get_generator(knowledge_base=self._knowledge_base)
+        match self._strategy:
+            case SearchStrategy.RANDOM:
+                return RandomGenerator(knowledge_base=self._knowledge_base)
+            case _:
+                assert_never(self.value)
