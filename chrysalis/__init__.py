@@ -1,8 +1,8 @@
-from chrysalis._internal import _invariants as invariants
-from chrysalis._internal._controller import (
+from chrysalis._internal import invariants
+from chrysalis._internal.controller import (
     register as register,
 )
-from chrysalis._internal._controller import (
+from chrysalis._internal.controller import (
     run as run,
 )
 

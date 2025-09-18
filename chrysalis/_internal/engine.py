@@ -5,8 +5,8 @@ from pathlib import Path
 
 import duckdb
 
-from chrysalis._internal import _tables as tables
-from chrysalis._internal._search import SearchSpace
+from chrysalis._internal import tables as tables
+from chrysalis._internal.search import SearchSpace
 
 
 class Engine[T, R]:

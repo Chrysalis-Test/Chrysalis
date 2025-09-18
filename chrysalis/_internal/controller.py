@@ -3,10 +3,10 @@ from pathlib import Path
 
 import duckdb
 
-from chrysalis._internal import _tables as tables
-from chrysalis._internal._engine import Engine
-from chrysalis._internal._relation import KnowledgeBase
-from chrysalis._internal._search import SearchSpace, SearchStrategy
+from chrysalis._internal import tables as tables
+from chrysalis._internal.engine import Engine
+from chrysalis._internal.relation import KnowledgeBase
+from chrysalis._internal.search import SearchSpace, SearchStrategy
 
 _CURRENT_KNOWLEDGE_BASE: KnowledgeBase | None = None
 """

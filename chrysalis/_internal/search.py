@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import assert_never
 from enum import Enum
 
-from chrysalis._internal._relation import KnowledgeBase, Relation
+from chrysalis._internal.relation import KnowledgeBase, Relation
 
 
 class SearchGenerator(ABC):
