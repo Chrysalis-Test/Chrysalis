@@ -52,12 +52,13 @@ results = chry.run(
 
 ## Official Documentation
 
-[docs](https://chrysalis-test.github.io/Chrysalis/index.html)
+[Chrysalis - A metamorphic testing framework that utilizes metamorphic relations to detect bugs.](https://chrysalis-test.github.io/Chrysalis/index.html)
 
 ## Development
 
 For development, use the following commands:
 
 - Format and check code: `./scripts/format_and_check.sh`
-- Run tests: `uv run pytest`
+- Run unit tests: `uv run pytest`
+- Run integration test: `python3 -m tests_integration.sql`
 - Build docs: `./scripts/build_docs.sh`
