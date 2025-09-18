@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from chrysalis._internal import _tables as tables
-from chrysalis._internal._relation import KnowledgeBase
+from chrysalis._internal import tables as tables
+from chrysalis._internal.relation import KnowledgeBase
 
 
 def test_temporary_sqlite_db_deletes_success(

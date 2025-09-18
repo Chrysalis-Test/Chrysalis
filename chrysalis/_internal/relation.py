@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from chrysalis._internal import _tables as tables
+from chrysalis._internal import tables as tables
 
 _LAMBDA_FUNCTION_NAME = "<lambda>"
 

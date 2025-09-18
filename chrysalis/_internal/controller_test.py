@@ -1,5 +1,5 @@
-from chrysalis._internal import _controller as controller
-from chrysalis._internal import _invariants as invariants
+from chrysalis._internal import controller as controller
+from chrysalis._internal import invariants as invariants
 from chrysalis._internal.conftest import (
     identity,
     inverse,

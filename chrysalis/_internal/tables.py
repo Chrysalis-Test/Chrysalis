@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 import duckdb
 
-from chrysalis._internal._relation import KnowledgeBase
+from chrysalis._internal.relation import KnowledgeBase
 
 _CREATE_TRANSFORMATION_TABLE = """
 CREATE TABLE transformation (

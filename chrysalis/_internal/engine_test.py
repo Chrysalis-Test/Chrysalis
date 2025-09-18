@@ -4,9 +4,9 @@ from typing import Generator
 
 from unittest.mock import MagicMock
 
-from chrysalis._internal._engine import Engine
-from chrysalis._internal._relation import KnowledgeBase, Relation
-from chrysalis._internal._tables import TemporarySqlite3RelationConnection
+from chrysalis._internal.engine import Engine
+from chrysalis._internal.relation import KnowledgeBase, Relation
+from chrysalis._internal.tables import TemporarySqlite3RelationConnection
 from chrysalis._internal.conftest import eval_expr
 
 
