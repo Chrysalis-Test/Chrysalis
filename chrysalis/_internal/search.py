@@ -26,21 +26,10 @@ class RandomGenerator(SearchGenerator):
         super().__init__(knowledge_base=knowledge_base)
 
         self._relations = list(self._knowledge_base.relations.values())
-        self._n = len(self._relations)
-        self._indicies = list(range(self._n))
-        self._weights = [1.0 for _ in range(self._n)]
+        self._indicies = list(range(len(self._relations)))
 
     def __next__(self) -> Relation:
-        choice = random.choices(self._indicies, self._weights, k=1)[0]
-        reduction = self._weights[choice] / 2
-
-        addition = reduction / (self._n - 1)
-        for i in range(self._n):
-            if i == choice:
-                self._weights[choice] = reduction
-            else:
-                self._weights[i] += addition
-
+        choice = random.choices(self._indicies, k=1)[0]
         return self._relations[choice]
 
 
