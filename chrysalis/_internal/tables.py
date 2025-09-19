@@ -107,24 +107,24 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
         # Arguably, this context manager should be based off `TemporaryFile` instead of
         # `TemporaryDirectory`, but this design was chosen due to ease of
         # implementation.
-        db_path = Path(temp_dir) / "chry.db"
-        conn = sqlite3.connect(db_path)
+        self._db_path = Path(temp_dir) / "chry.db"
+        self._conn = sqlite3.connect(self._db_path)
 
         # Sqlite3 doesn't enfore foreign key existance by default.
-        conn.execute("PRAGMA foreign_keys = ON")
+        self._conn.execute("PRAGMA foreign_keys = ON")
 
-        conn.execute(_CREATE_TRANSFORMATION_TABLE)
-        conn.execute(_CREATE_INVARIANT_TABLE)
-        conn.execute(_CREATE_RELATION_TABLE)
-        conn.execute(_CREATE_INPUT_DATA_TABLE)
-        conn.execute(_CREATE_APPLIED_TRANSFORMATION_TABLE)
-        conn.execute(_CREATE_FAILED_INVARIANT_TABLE)
+        self._conn.execute(_CREATE_TRANSFORMATION_TABLE)
+        self._conn.execute(_CREATE_INVARIANT_TABLE)
+        self._conn.execute(_CREATE_RELATION_TABLE)
+        self._conn.execute(_CREATE_INPUT_DATA_TABLE)
+        self._conn.execute(_CREATE_APPLIED_TRANSFORMATION_TABLE)
+        self._conn.execute(_CREATE_FAILED_INVARIANT_TABLE)
 
         for (
             transformation_name,
             transformation_id,
         ) in self._knowledge_base.transformation_ids.items():
-            conn.execute(
+            self._conn.execute(
                 "INSERT INTO transformation (id, name) VALUES (?, ?);",
                 (transformation_id, transformation_name),
             )
@@ -133,19 +133,23 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
             invariant_name,
             invariant_id,
         ) in self._knowledge_base.invariant_ids.items():
-            conn.execute(
+            self._conn.execute(
                 "INSERT INTO invariant (id, name) VALUES (?, ?);",
                 (invariant_id, invariant_name),
             )
 
         for relation in self._knowledge_base.relations.values():
             for invariant_id in relation.invariants:
-                conn.execute(
+                self._conn.execute(
                     "INSERT INTO relation (transformation, invariant) VALUES (?, ?);",
                     (relation.transformation_id, invariant_id),
                 )
 
-        return conn, db_path
+        return self._conn, self._db_path
+
+    def __exit__(self, *args, **kwargs):
+        self._conn.close()
+        return super().__exit__(*args, **kwargs)
 
 
 def sqlite_to_duckdb(
