@@ -7,6 +7,7 @@ import duckdb
 
 from chrysalis._internal import tables as tables
 from chrysalis._internal.search import SearchSpace
+from chrysalis._internal.writer import Writer
 
 
 class Engine[T, R]:
@@ -42,6 +43,7 @@ class Engine[T, R]:
         sqlite_conn: sqlite3.Connection,
         sqlite_db: Path,
         num_processes: int = 8,
+        writer: Writer | None = None,
     ):
         if num_processes > 1:
             raise NotImplementedError
@@ -51,6 +53,7 @@ class Engine[T, R]:
         self._conn = sqlite_conn
         self._sqlite_db = sqlite_db
         self._num_processes = num_processes
+        self._writer = writer
 
         # Insert input data into database and store uuid for future reference.
         self._input_data: dict[str, T] = {}
@@ -155,6 +158,9 @@ VALUES (?, ?, ?, ?);
                 # TODO(nathanhuey44@gmail.com): Catch errors, exit gracefully, and
                 # report error.
                 current_results.append(self._sut(curr_input))  # NOQA: PERF401
+
+                if self._writer is not None:
+                    self._writer.report_finished_test_case()
 
             current_transformation_id = self._insert_applied_transformation(
                 transformation=relation.transformation_id,

@@ -7,6 +7,7 @@ from chrysalis._internal import tables as tables
 from chrysalis._internal.engine import Engine
 from chrysalis._internal.relation import KnowledgeBase
 from chrysalis._internal.search import SearchSpace, SearchStrategy
+from chrysalis._internal.writer import Writer
 
 _CURRENT_KNOWLEDGE_BASE: KnowledgeBase | None = None
 """
@@ -89,18 +90,20 @@ def run[T, R](
             strategy=search_strategy,
         )
 
-        engine = Engine(
-            sut=sut,
-            input_data=input_data,
-            num_processes=num_processes,
-            search_space=search_space,
-            sqlite_conn=conn,
-            sqlite_db=db_path,
-        )
-        engine.execute(
-            chain_length=chain_length,
-            num_chains=num_chains,
-        )
+        with Writer(chain_length=chain_length, num_chains=num_chains) as writer:
+            engine = Engine(
+                sut=sut,
+                input_data=input_data,
+                num_processes=num_processes,
+                search_space=search_space,
+                sqlite_conn=conn,
+                sqlite_db=db_path,
+                writer=writer,
+            )
+            engine.execute(
+                chain_length=chain_length,
+                num_chains=num_chains,
+            )
 
         duckdb_conn = engine.results_to_duckdb(db_path=persistent_db_path)
         conn.close()

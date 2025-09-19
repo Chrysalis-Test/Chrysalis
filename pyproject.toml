@@ -13,7 +13,12 @@ authors = [
   { name = "Nathan Huey", email = "nathanhuey44@gmail.com" },
   { name = "Jai Parera", email = "jaiparera@gmail.com" },
 ]
-dependencies = ["pytest>=8.0.0", "duckdb>=1.2.0"]
+dependencies = [
+  "pytest>=8.0.0",
+  "duckdb>=1.2.0",
+  "tqdm>=4.67.1",
+  "types-tqdm>=4.67.0.20250809",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -24,11 +29,11 @@ version = { attr = "chrysalis.__about__.__version__" }
 
 [dependency-groups]
 dev = [
-    "furo>=2025.7.19",
-    "mypy>=1.17.1",
-    "polars>=1.33.1",
-    "pyarrow>=21.0.0",
-    "ruff>=0.12.11",
-    "sphinx>=8.2.3",
-    "sqlglot>=27.15.2",
+  "furo>=2025.7.19",
+  "mypy>=1.17.1",
+  "polars>=1.33.1",
+  "pyarrow>=21.0.0",
+  "ruff>=0.12.11",
+  "sphinx>=8.2.3",
+  "sqlglot>=27.15.2",
 ]
