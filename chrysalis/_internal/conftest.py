@@ -3,7 +3,7 @@ import ast
 import pytest
 
 from chrysalis._internal import invariants
-from chrysalis._internal.relation import KnowledgeBase, Relation
+from chrysalis._internal.tables.relation import KnowledgeBase, Relation
 
 
 @pytest.fixture

@@ -107,25 +107,6 @@ def evaluate_query(query: str) -> pl.DataFrame:
 
 _INPUT_QUERY = "SELECT name, position, college, team, round, draft FROM player_stats;"
 
-chry.register(transformations.add_college_column, invariants.length_equals)
-chry.register(transformations.add_team_column, invariants.length_equals)
-chry.register(transformations.add_round_column, invariants.length_equals)
-chry.register(transformations.add_draft_column, invariants.length_equals)
-chry.register(transformations.remove_college_column, invariants.length_equals)
-chry.register(transformations.remove_team_column, invariants.length_equals)
-chry.register(transformations.remove_round_column, invariants.length_equals)
-chry.register(transformations.remove_draft_column, invariants.length_equals)
-
-chry.register(transformations.add_order_by_asc, invariants.length_equals)
-chry.register(transformations.add_order_by_desc, invariants.length_equals)
-chry.register(transformations.remove_order_by, invariants.length_equals)
-
-# Intentional bug, it is possible that adding `LIMIT 8` will remove `LIMIT 4` and
-# cause the invariant to fail.
-chry.register(transformations.add_limit_8, invariants.length_less_than_equals)
-chry.register(transformations.add_limit_4, invariants.length_less_than_equals)
-chry.register(transformations.remove_limit, invariants.length_greater_than_equals)
-
 
 def _assert_num_rows(
     table: str,
@@ -139,8 +120,30 @@ def _assert_num_rows(
     assert count == num_rows
 
 
+def register_relations() -> None:
+    chry.register(transformations.add_college_column, invariants.length_equals)
+    chry.register(transformations.add_team_column, invariants.length_equals)
+    chry.register(transformations.add_round_column, invariants.length_equals)
+    chry.register(transformations.add_draft_column, invariants.length_equals)
+    chry.register(transformations.remove_college_column, invariants.length_equals)
+    chry.register(transformations.remove_team_column, invariants.length_equals)
+    chry.register(transformations.remove_round_column, invariants.length_equals)
+    chry.register(transformations.remove_draft_column, invariants.length_equals)
+
+    chry.register(transformations.add_order_by_asc, invariants.length_equals)
+    chry.register(transformations.add_order_by_desc, invariants.length_equals)
+    chry.register(transformations.remove_order_by, invariants.length_equals)
+
+    # Intentional bug, it is possible that adding `LIMIT 8` will remove `LIMIT 4` and
+    # cause the invariant to fail.
+    chry.register(transformations.add_limit_8, invariants.length_less_than_equals)
+    chry.register(transformations.add_limit_4, invariants.length_less_than_equals)
+    chry.register(transformations.remove_limit, invariants.length_greater_than_equals)
+
+
 if __name__ == "__main__":
     random.seed(0)
+    register_relations()
     conn = chry.run(
         sut=evaluate_query,
         input_data=[_INPUT_QUERY],

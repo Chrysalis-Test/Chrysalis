@@ -1,8 +1,15 @@
+import uuid
 from collections.abc import Callable
+from typing import Self
 
-from chrysalis._internal import tables as tables
+import duckdb
 
 _LAMBDA_FUNCTION_NAME = "<lambda>"
+
+
+def generate_uuid() -> str:
+    """Generate a 16 byte random uuid using the UUID4 specification."""
+    return uuid.uuid4().hex
 
 
 class Relation[T, R]:
@@ -73,12 +80,102 @@ class KnowledgeBase[T, R]:
         self._invariants: dict[str, str] = {}
         self._relations: dict[str, Relation[T, R]] = {}
 
+    @classmethod
+    def load_previous(
+        cls,
+        current: Self,
+        conn: duckdb.DuckDBPyConnection,
+    ) -> Self:
+        """
+        Load a previous knowledge base.
+
+        When replaying metamorphic testing, the knowledge base used to perform the
+        original testing must be available. The previous knowledge base can be loaded
+        from the current knowledge base **if** the current knowledge base is a superset
+        (includes transformations, invariants, and relations).
+
+        Parameters
+        ----------
+        current : KnowledgeBase
+            The currently knowledge base loaded in the session. This knowledge base
+            **must** be a superset of the knowledge base that is to be loaded.
+        conn : duckdb.DuckDBPyConnection
+            A DuckDB connection that contains the results of a previous metamorphic
+            testing run.
+        """
+        prev = cls()
+
+        for id, name in conn.query(
+            """
+SELECT id, name
+FROM transformation;
+"""
+        ).fetchall():
+            prev._transformations[name] = id
+
+        for id, name in conn.query(
+            """
+SELECT id, name
+FROM invariant;
+"""
+        ).fetchall():
+            prev._invariants[name] = id
+
+        for (
+            transformation_id,
+            transformation_name,
+            invariant_id,
+            invariant_name,
+        ) in conn.query(
+            """
+SELECT
+    t.id AS transformation_id,
+    t.name AS transformation_name,
+    i.id AS invariant_id,
+    i.name AS invariant_name
+FROM
+    relation r
+INNER JOIN
+    transformation t
+ON
+    r.transformation = t.id
+INNER JOIN
+    invariant i
+ON
+    r.invariant = i.id;
+        """
+        ).fetchall():
+            current_transformation_id = current._transformations[transformation_name]
+            if transformation_id not in prev._relations:
+                current_transformation = current._relations[
+                    current_transformation_id
+                ]._transformation
+                prev._relations[transformation_id] = Relation[T, R](
+                    transformation=current_transformation,
+                    transformation_id=transformation_id,
+                )
+            current_invariant_id = current._invariants[invariant_name]
+            current_invariant = current._relations[
+                current_transformation_id
+            ]._invariants[current_invariant_id]
+            prev._relations[transformation_id].add_invariant(
+                current_invariant,
+                invariant_id,
+            )
+
+        return prev
+
     def register(
         self,
         transformation: Callable[[T], T],
         invariant: Callable[[R, R], bool],
     ):
-        """Register a relation into the knowledge base, ensuring the name is unique."""
+        """
+        Register a relation into the knowledge base, ensuring the name is unique.
+
+        While there are other ways to add transformations, invariants, and relations,
+        this should be the default method.
+        """
         transformation_name = transformation.__name__
         invariant_name = invariant.__name__
         if _LAMBDA_FUNCTION_NAME in {transformation_name, invariant_name}:
@@ -87,9 +184,9 @@ class KnowledgeBase[T, R]:
             )
 
         if transformation_name not in self._transformations:
-            self._transformations[transformation_name] = tables.generate_uuid()
+            self._transformations[transformation_name] = generate_uuid()
         if invariant_name not in self._invariants:
-            self._invariants[invariant_name] = tables.generate_uuid()
+            self._invariants[invariant_name] = generate_uuid()
         transformation_id = self._transformations[transformation_name]
         invariant_id = self._invariants[invariant_name]
 
@@ -117,5 +214,5 @@ class KnowledgeBase[T, R]:
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}(relations={list(self._transformations.keys())}"
+            f"{self.__class__.__name__}(relations={list(self._transformations.keys())})"
         )

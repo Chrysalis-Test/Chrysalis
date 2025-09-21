@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from chrysalis._internal import tables as tables
-from chrysalis._internal.relation import KnowledgeBase
+from chrysalis._internal.tables import defs
+from chrysalis._internal.tables.relation import KnowledgeBase
 
 
 def test_temporary_sqlite_db_deletes_success(
     mock_knowledge_base: KnowledgeBase,
 ) -> None:
-    with tables.TemporarySqlite3RelationConnection(
+    with defs.TemporarySqlite3RelationConnection(
         knowledge_base=mock_knowledge_base
     ) as (_, db_path):
         pass
@@ -17,7 +17,7 @@ def test_temporary_sqlite_db_deletes_success(
 def test_temporary_sqlite_db_deletes_error(mock_knowledge_base: KnowledgeBase) -> None:
     p: Path | None = None
     try:
-        with tables.TemporarySqlite3RelationConnection(
+        with defs.TemporarySqlite3RelationConnection(
             knowledge_base=mock_knowledge_base
         ) as (_, db_path):
             p = db_path
@@ -32,7 +32,7 @@ def test_temporary_sqlite_db_deletes_error(mock_knowledge_base: KnowledgeBase) -
 def test_temporary_sqlite_db_fields(
     mock_knowledge_base: KnowledgeBase,
 ) -> None:
-    with tables.TemporarySqlite3RelationConnection(
+    with defs.TemporarySqlite3RelationConnection(
         knowledge_base=mock_knowledge_base
     ) as (conn, _):
         transformations_values = conn.execute(

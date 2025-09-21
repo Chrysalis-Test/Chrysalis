@@ -3,9 +3,9 @@ from pathlib import Path
 
 import duckdb
 
-from chrysalis._internal import tables as tables
+from chrysalis._internal.tables.defs import TemporarySqlite3RelationConnection
 from chrysalis._internal.engine import Engine
-from chrysalis._internal.relation import KnowledgeBase
+from chrysalis._internal.tables.relation import KnowledgeBase
 from chrysalis._internal.search import SearchSpace, SearchStrategy
 from chrysalis._internal.writer import Writer
 
@@ -24,6 +24,11 @@ def reset_knowledge_base() -> None:
     """Initialize a new knowledge base for the module."""
     global _CURRENT_KNOWLEDGE_BASE  # NOQA: PLW0603
     _CURRENT_KNOWLEDGE_BASE = KnowledgeBase()
+
+
+def get_knowledge_base() -> KnowledgeBase | None:
+    global _CURRENT_KNOWLEDGE_BASE  # NOQA: PLW0603
+    return _CURRENT_KNOWLEDGE_BASE
 
 
 def register[T, R](
@@ -81,7 +86,7 @@ def run[T, R](
             "No metamorphic relations have been registered in the current session, exiting."
         )
 
-    with tables.TemporarySqlite3RelationConnection(_CURRENT_KNOWLEDGE_BASE) as (
+    with TemporarySqlite3RelationConnection(_CURRENT_KNOWLEDGE_BASE) as (
         conn,
         db_path,
     ):
