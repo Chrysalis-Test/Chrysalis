@@ -2,7 +2,7 @@ import ast
 import random
 
 from chrysalis._internal import invariants
-from chrysalis._internal.relation import KnowledgeBase
+from chrysalis._internal.tables.relation import KnowledgeBase
 from chrysalis._internal.search import SearchSpace, SearchStrategy
 from chrysalis._internal.conftest import (
     identity,

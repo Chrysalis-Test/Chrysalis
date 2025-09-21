@@ -5,7 +5,8 @@ from pathlib import Path
 
 import duckdb
 
-from chrysalis._internal import tables as tables
+from chrysalis._internal.tables import defs
+from chrysalis._internal.tables.relation import generate_uuid
 from chrysalis._internal.search import SearchSpace
 from chrysalis._internal.writer import Writer
 
@@ -71,7 +72,7 @@ class Engine[T, R]:
         cursor: sqlite3.Cursor,
     ) -> str:
         """Insert a record into the `input_data` table."""
-        input_data_id = tables.generate_uuid()
+        input_data_id = generate_uuid()
         cursor.execute(
             """
 INSERT INTO input_data (id, obj)
@@ -89,7 +90,7 @@ VALUES (?, ?);
         cursor: sqlite3.Cursor,
     ) -> str:
         """Insert a record into the `applied_transformation` table."""
-        applied_transformation_id = tables.generate_uuid()
+        applied_transformation_id = generate_uuid()
         cursor.execute(
             """
 INSERT INTO applied_transformation
@@ -114,7 +115,7 @@ VALUES
         cursor: sqlite3.Cursor,
     ) -> None:
         """Insert a record into the `failed_invariant` table."""
-        invariant_id = tables.generate_uuid()
+        invariant_id = generate_uuid()
         cursor.execute(
             """
 INSERT INTO failed_invariant (id, invariant, applied_transformation, input_data)
@@ -140,7 +141,7 @@ VALUES (?, ?, ?, ?);
 
         generator = self._search_space.create_generator()
 
-        relation_chain_id = tables.generate_uuid()
+        relation_chain_id = generate_uuid()
         previous_inputs = list(self._input_data.values())
         previous_results = results
         for link_index in range(chain_length):
@@ -220,4 +221,4 @@ VALUES (?, ?, ?, ?);
         convert the database into a duckdb database due to duckdb's better performance
         on analytical queries and better data compression.
         """
-        return tables.sqlite_to_duckdb(self._sqlite_db, output_db_path=db_path)
+        return defs.sqlite_to_duckdb(self._sqlite_db, output_db_path=db_path)

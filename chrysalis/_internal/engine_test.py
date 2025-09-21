@@ -5,8 +5,8 @@ from typing import Generator
 from unittest.mock import MagicMock
 
 from chrysalis._internal.engine import Engine
-from chrysalis._internal.relation import KnowledgeBase, Relation
-from chrysalis._internal.tables import TemporarySqlite3RelationConnection
+from chrysalis._internal.tables.relation import KnowledgeBase, Relation
+from chrysalis._internal.tables.defs import TemporarySqlite3RelationConnection
 from chrysalis._internal.conftest import eval_expr
 
 

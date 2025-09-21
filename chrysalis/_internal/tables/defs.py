@@ -1,11 +1,10 @@
 import sqlite3
-import uuid
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import duckdb
 
-from chrysalis._internal.relation import KnowledgeBase
+from chrysalis._internal.tables.relation import KnowledgeBase
 
 _CREATE_TRANSFORMATION_TABLE = """
 CREATE TABLE transformation (
@@ -152,6 +151,15 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
         return super().__exit__(*args, **kwargs)
 
 
+def init_duckdb(conn: duckdb.DuckDBPyConnection) -> None:
+    conn.execute(_CREATE_TRANSFORMATION_TABLE)
+    conn.execute(_CREATE_INVARIANT_TABLE)
+    conn.execute(_CREATE_RELATION_TABLE)
+    conn.execute(_CREATE_INPUT_DATA_TABLE)
+    conn.execute(_CREATE_APPLIED_TRANSFORMATION_TABLE)
+    conn.execute(_CREATE_FAILED_INVARIANT_TABLE)
+
+
 def sqlite_to_duckdb(
     sqlite_db: Path,
     output_db_path: Path | None = None,
@@ -169,17 +177,12 @@ def sqlite_to_duckdb(
     else:
         duckdb_conn = duckdb.connect()
 
-    # Sqlite needs to be installed within duckdb before `sqlite_scan` can be used.
-    duckdb_conn.execute("INSTALL sqlite;")
-
     # The schema of the tables needs to be specified before records are inserted. If
     # the schema is inferred from sqlite, it may be wrong.
-    duckdb_conn.execute(_CREATE_TRANSFORMATION_TABLE)
-    duckdb_conn.execute(_CREATE_INVARIANT_TABLE)
-    duckdb_conn.execute(_CREATE_RELATION_TABLE)
-    duckdb_conn.execute(_CREATE_INPUT_DATA_TABLE)
-    duckdb_conn.execute(_CREATE_APPLIED_TRANSFORMATION_TABLE)
-    duckdb_conn.execute(_CREATE_FAILED_INVARIANT_TABLE)
+    init_duckdb(duckdb_conn)
+
+    # Sqlite needs to be installed within duckdb before `sqlite_scan` can be used.
+    duckdb_conn.execute("INSTALL sqlite;")
 
     duckdb_conn.execute(
         """
@@ -229,8 +232,3 @@ SELECT * FROM sqlite_scan(?, ?);
         (str(sqlite_db), "failed_invariant"),
     )
     return duckdb_conn
-
-
-def generate_uuid() -> str:
-    """Generate a 16 byte random uuid using the UUID4 specification."""
-    return uuid.uuid4().hex
