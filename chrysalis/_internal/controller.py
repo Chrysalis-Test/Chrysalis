@@ -27,6 +27,7 @@ def reset_knowledge_base() -> None:
 
 
 def get_knowledge_base() -> KnowledgeBase | None:
+    """Fetch the knowledge base of the current session."""
     global _CURRENT_KNOWLEDGE_BASE  # NOQA: PLW0603
     return _CURRENT_KNOWLEDGE_BASE
 

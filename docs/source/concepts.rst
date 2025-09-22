@@ -10,12 +10,6 @@ System Under Test (SUT)
 The **System Under Test** is the function or system you want to test. This can
 be any callable Python object or function that takes input and produces output.
 
-.. code-block:: python
-
-   def my_sut(input_data):
-       # Your system logic here
-       return processed_data
-
 Transformations
 ---------------
 
@@ -37,10 +31,8 @@ Invariants
 output. More simply, invariants are functions that compare two consecutive outputs of the system under
 test and return a boolean value. They express properties that should hold regardless of the transformation.
 
-Built-in Invariants
-~~~~~~~~~~~~~~~~~~~
-
-Chrysalis provides several common invariants.
+Chrysalis provides several common and general invariants. Users should define their own invariants if the
+subject of metamorphic testing is more specific.
 
 Metamorphic Relations
 ---------------------
@@ -48,9 +40,10 @@ Metamorphic Relations
 A **Metamorphic Relation** is the combination of a transformation and an invariant. It defines a testable
 property of the system under test.
 
+Once a transformation and invariant is defined, it is easy to register a relation.
+
 .. code-block:: python
 
-   # If the input array is reversed, the sorting function should still produce the same result."
    chry.register(
        transformation=reverse_array,
        invariant=chry.invariants.equals
@@ -58,6 +51,11 @@ property of the system under test.
 
 Test Process
 ~~~~~~~~~~~~
+
+.. image:: _static/relation_chain.jpg
+   :width: 1000px
+   :alt: A diagram of a relation chain
+   :align: center
 
 1. Start with original input
 2. Apply transformation to get transformed input

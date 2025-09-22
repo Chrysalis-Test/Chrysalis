@@ -35,36 +35,12 @@ Key Features
 - **Tuneable Testing Engine**: Configure testing parameters
 - **Logging and Replay**: Comprehensive test execution logs
 
-Quick Start
------------
-
 Installation
 ~~~~~~~~~~~~
 
 .. code-block:: bash
 
    pip install chrysalis-test
-
-Basic Usage
-~~~~~~~~~~~
-
-.. code-block:: python
-
-   import chrysalis as chry
-
-   # Register a metamorphic relation
-   chry.register(
-       transformation=my_transformation,
-       invariant=chry.invariants.equals
-   )
-
-   # Run tests
-   results = chry.run(
-       sut=my_function,
-       input_data=test_data,
-       chain_length=10,
-       num_chains=20
-   )
 
 Publication
 ~~~~~~~~~~~
@@ -75,8 +51,8 @@ Publication
    :maxdepth: 2
    :caption: User Guide:
 
-   getting-started
    concepts
+   relational-model
    contributing
 
 .. toctree::
