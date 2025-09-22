@@ -30,6 +30,7 @@ exclude_patterns: list[str] = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "furo"
+html_static_path = ["_static"]
 
 # Show the toctree on all pages
 html_sidebars = {"**": ["sidebar/brand.html", "sidebar/navigation.html"]}
