@@ -54,7 +54,6 @@ def run[T, R](
     chain_length: int = 10,
     num_chains: int = 10,
     persistent_db_path: Path | None = None,
-    num_processes: int = 1,
 ) -> duckdb.DuckDBPyConnection:
     """
     Run metamorphic testing on the SUT using previously registered relations.
@@ -79,8 +78,6 @@ def run[T, R](
         The location to save the database file for the resultant duckdb connection. If
         no value is specified, the duckdb connection is made in-memory and thus the
         data in the connection is lost when the processes exits.
-    num_processes: int, optional
-        The number of processes to use when performing metamorphic testing.
     """
     if _CURRENT_KNOWLEDGE_BASE is None:
         raise RuntimeError(
@@ -100,7 +97,6 @@ def run[T, R](
             engine = Engine(
                 sut=sut,
                 input_data=input_data,
-                num_processes=num_processes,
                 search_space=search_space,
                 sqlite_conn=conn,
                 sqlite_db=db_path,

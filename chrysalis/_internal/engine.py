@@ -43,17 +43,12 @@ class Engine[T, R]:
         search_space: SearchSpace,
         sqlite_conn: sqlite3.Connection,
         sqlite_db: Path,
-        num_processes: int = 8,
         writer: Writer | None = None,
     ):
-        if num_processes > 1:
-            raise NotImplementedError
-
         self._sut = sut
         self._search_space = search_space
         self._conn = sqlite_conn
         self._sqlite_db = sqlite_db
-        self._num_processes = num_processes
         self._writer = writer
 
         # Insert input data into database and store uuid for future reference.
@@ -130,35 +125,39 @@ VALUES (?, ?, ?, ?);
         cursor: sqlite3.Cursor,
     ) -> None:
         """Execute a relation chain and store all results in a provided database."""
-        results: list[R] = []
-        input_data_ids = list(self._input_data.keys())
-        # TODO(nathanhuey44.gmail.com): The results of the SUT on the input data is
-        # consistent for all relation chains and should be cached.
-        for curr_input in self._input_data.values():
-            # TODO(nathanhuey44@gmail.com): Catch errors, exit gracefully, and report
-            # error.
-            results.append(self._sut(curr_input))  # NOQA: PERF401
+        results: dict[str, R] = {}
+        for curr_id, curr_input in self._input_data.items():
+            try:
+                results[curr_id] = self._sut(curr_input)  # NOQA: PERF401
+            except Exception as e:
+                raise RuntimeError(
+                    f"Exception encountered while running the SUT on input `{curr_id}`: {e}"
+                )
 
         generator = self._search_space.create_generator()
 
         relation_chain_id = generate_uuid()
-        previous_inputs = list(self._input_data.values())
+        previous_inputs = self._input_data
         previous_results = results
         for link_index in range(chain_length):
             relation = next(generator)
-            current_inputs: list[T] = []
-            for prev_input in previous_inputs:
-                # TODO(nathanhuey44@gmail.com): Catch errors, exit gracefully, and
-                # report error.
-                current_inputs.append(  # NOQA: PERF401
-                    relation.apply_transform(prev_input)
-                )
+            current_inputs: dict[str, T] = {}
+            for input_id, prev_input in previous_inputs.items():
+                try:
+                    current_inputs[input_id] = relation.apply_transform(prev_input)
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Exception encountered while applying transform `{relation.transformation_id}` on the input `{input_id}`: {e}"
+                    )
 
-            current_results: list[R] = []
-            for curr_input in current_inputs:
-                # TODO(nathanhuey44@gmail.com): Catch errors, exit gracefully, and
-                # report error.
-                current_results.append(self._sut(curr_input))  # NOQA: PERF401
+            current_results: dict[str, R] = {}
+            for input_id, curr_input in current_inputs.items():
+                try:
+                    current_results[input_id] = self._sut(curr_input)
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Exception encountered while running the SUT on input `{input_id}` after transform `{relation.transformation_id}`: {e}"
+                    )
 
                 if self._writer is not None:
                     self._writer.report_finished_test_case()
@@ -170,14 +169,14 @@ VALUES (?, ?, ?, ?);
                 cursor=cursor,
             )
             for invariant_id, invariant in relation.invariants.items():
-                for i, (prev_result, curr_result) in enumerate(
-                    zip(previous_results, current_results, strict=True)
+                for (input_id, prev_result), curr_result in zip(
+                    previous_results.items(), current_results.values(), strict=True
                 ):
                     if not invariant(curr_result, prev_result):
                         self._insert_failed_invariant(
                             invariant=invariant_id,
                             applied_transformation=current_transformation_id,
-                            input_data=input_data_ids[i],
+                            input_data=input_id,
                             cursor=cursor,
                         )
 
@@ -199,14 +198,15 @@ VALUES (?, ?, ?, ?);
         transformation and thus multiple invariant can be checked during a single step
         in a relation chain.
         """
-        # TODO(nathanhuey44@gmail.com): Implement a multi-process version of this
-        # execute functionality using sqlite3 cursors.
         cursor = self._conn.cursor()
         for _ in range(num_chains):
-            self._execute_chain(
-                chain_length=chain_length,
-                cursor=cursor,
-            )
+            try:
+                self._execute_chain(
+                    chain_length=chain_length,
+                    cursor=cursor,
+                )
+            except Exception as e:
+                print(e)
         self._conn.commit()
 
     def results_to_duckdb(

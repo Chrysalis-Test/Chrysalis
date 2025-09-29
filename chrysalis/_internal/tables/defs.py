@@ -41,7 +41,7 @@ _CREATE_APPLIED_TRANSFORMATION_TABLE = """
 CREATE TABLE applied_transformation (
     id TEXT PRIMARY KEY,
     transformation TEXT NOT NULL,
-    relation_chain_id TEXT,
+    relation_chain_id TEXT NOT NULL,
     link_index INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 

@@ -38,7 +38,6 @@ def test_successful_relation_chain(
             search_space=search_space,
             sqlite_conn=temp_conn,
             sqlite_db=db_path,
-            num_processes=1,
         )
         engine.execute(chain_length=3, num_chains=1)
         conn = engine.results_to_duckdb()
@@ -86,7 +85,6 @@ def test_unsuccessful_relation_chain(
             search_space=search_space,
             sqlite_conn=temp_conn,
             sqlite_db=db_path,
-            num_processes=1,
         )
         engine.execute(chain_length=3, num_chains=1)
         conn = engine.results_to_duckdb()
