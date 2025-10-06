@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from typing import assert_never, Iterator
+from typing import assert_never
 from enum import Enum
 
 from chrysalis._internal.tables.relation import KnowledgeBase, Relation
@@ -9,9 +9,6 @@ from chrysalis._internal.tables.relation import KnowledgeBase, Relation
 class SearchGenerator(ABC):
     def __init__(self, knowledge_base: KnowledgeBase) -> None:
         self._knowledge_base = knowledge_base
-
-    def __iter__(self) -> Iterator:
-        return self
 
     @abstractmethod
     def __next__(self) -> Relation:
