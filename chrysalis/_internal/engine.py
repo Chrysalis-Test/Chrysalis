@@ -139,8 +139,8 @@ VALUES (?, ?, ?, ?);
         relation_chain_id = generate_uuid()
         previous_inputs = self._input_data
         previous_results = results
-        for link_index in range(chain_length):
-            relation = next(generator)
+        for link_index, relation in zip(range(chain_length), generator):
+            # relation = next(generator)
             current_inputs: dict[str, T] = {}
             for input_id, prev_input in previous_inputs.items():
                 try:
