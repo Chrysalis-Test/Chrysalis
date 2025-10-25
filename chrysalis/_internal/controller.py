@@ -58,6 +58,17 @@ def run[T, R](
     """
     Run metamorphic testing on the SUT using previously registered relations.
 
+    During testing, Chrysalis records all relation chains and results in a temporary
+    sqlite3 database. When testing has completed, Chrysalis ports this database to a
+    duckdb database (better for analyitical processing) and returns a connection handle
+    to the user.
+
+    If the `persistent_db_path` parameter is set, the duckdb database is stored
+    persistently at the configured path. It is highly recommended that the user
+    configure an output location so metamorphic testing results are not lost upon the
+    completion of testing. Additionally if an unhandled error is encountered, the
+    database will still be stored persistently.
+
     Parameters
     ----------
     sut : Callable[[T], R]
@@ -84,7 +95,10 @@ def run[T, R](
             "No metamorphic relations have been registered in the current session, exiting."
         )
 
-    with TemporarySqlite3RelationConnection(_CURRENT_KNOWLEDGE_BASE) as (
+    duckdb_conn: duckdb.DuckDBPyConnection | None = None
+    with TemporarySqlite3RelationConnection(
+        knowledge_base=_CURRENT_KNOWLEDGE_BASE, persistent_db_path=persistent_db_path
+    ) as (
         conn,
         db_path,
     ):
@@ -107,7 +121,17 @@ def run[T, R](
                 num_chains=num_chains,
             )
 
-        duckdb_conn = engine.results_to_duckdb(db_path=persistent_db_path)
-        conn.close()
+        # If persistent db, a duckdb file will automatically be created by the context
+        # manager, thus we should load from that location.
+        if persistent_db_path is None:
+            duckdb_conn = engine.results_to_duckdb()
+
+    if persistent_db_path is not None:
+        duckdb_conn = duckdb.connect(persistent_db_path)
+
+    if duckdb_conn is None:
+        raise RuntimeError(
+            "Somehow, the internally created ducdb connection is `None`, exiting."
+        )
 
     return duckdb_conn

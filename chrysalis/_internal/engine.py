@@ -208,9 +208,7 @@ VALUES (?, ?, ?, ?);
                 print(e)
         self._conn.commit()
 
-    def results_to_duckdb(
-        self, db_path: Path | None = None
-    ) -> duckdb.DuckDBPyConnection:
+    def results_to_duckdb(self) -> duckdb.DuckDBPyConnection:
         """
         Convert the sqlite3 database kept during execution into a duckdb database.
 
@@ -220,4 +218,4 @@ VALUES (?, ?, ?, ?);
         convert the database into a duckdb database due to duckdb's better performance
         on analytical queries and better data compression.
         """
-        return defs.sqlite_to_duckdb(self._sqlite_db, output_db_path=db_path)
+        return defs.sqlite_to_duckdb(self._sqlite_db)
