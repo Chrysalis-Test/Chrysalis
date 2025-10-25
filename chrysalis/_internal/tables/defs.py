@@ -91,8 +91,11 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
     extracted before exiting the context manager.
     """
 
-    def __init__(self, knowledge_base: KnowledgeBase):
+    def __init__(
+        self, knowledge_base: KnowledgeBase, persistent_db_path: Path | None = None
+    ):
         self._knowledge_base = knowledge_base
+        self._persistent_db_path = persistent_db_path
         super().__init__()
 
     def __enter__(self, *args, **kwargs) -> tuple[sqlite3.Connection, Path]:
@@ -148,6 +151,12 @@ class TemporarySqlite3RelationConnection(TemporaryDirectory):
 
     def __exit__(self, *args, **kwargs):
         self._conn.close()
+        if self._persistent_db_path is not None:
+            duckdb_conn = sqlite_to_duckdb(
+                sqlite_db=self._db_path, output_db_path=self._persistent_db_path
+            )
+            duckdb_conn.close()
+
         return super().__exit__(*args, **kwargs)
 
 
